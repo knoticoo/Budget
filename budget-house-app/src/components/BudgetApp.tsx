@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Plus, TrendingUp, TrendingDown, CreditCard, Wallet, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { Plus, TrendingUp, TrendingDown, CreditCard, Wallet, ArrowUpRight, ArrowDownRight, DollarSign, Receipt, Target, Eye, EyeOff } from 'lucide-react';
 
 interface Transaction {
   id: string;
@@ -55,11 +55,11 @@ const BudgetApp: React.FC = () => {
   ]);
 
   const [budgets, setBudgets] = useState<Budget[]>([
-    { category: 'Food', allocated: 500, spent: 150, color: '#FF6384' },
-    { category: 'Transport', allocated: 200, spent: 50, color: '#36A2EB' },
-    { category: 'Entertainment', allocated: 300, spent: 0, color: '#FFCE56' },
-    { category: 'Rent', allocated: 1000, spent: 800, color: '#4BC0C0' },
-    { category: 'Utilities', allocated: 200, spent: 0, color: '#9966FF' }
+    { category: 'Food', allocated: 500, spent: 150, color: '#10B981' },
+    { category: 'Transport', allocated: 200, spent: 50, color: '#3B82F6' },
+    { category: 'Entertainment', allocated: 300, spent: 0, color: '#8B5CF6' },
+    { category: 'Rent', allocated: 1000, spent: 800, color: '#F59E0B' },
+    { category: 'Utilities', allocated: 200, spent: 0, color: '#EF4444' }
   ]);
 
   const [newTransaction, setNewTransaction] = useState({
@@ -70,7 +70,8 @@ const BudgetApp: React.FC = () => {
   });
 
   const [showAddTransaction, setShowAddTransaction] = useState(false);
-  const revolutBalance = 2145.67; // Mock Revolut balance
+  const [hideBalances, setHideBalances] = useState(false);
+  const revolutBalance = 2145.67;
 
   // Calculate totals
   const totalIncome = transactions
@@ -94,7 +95,7 @@ const BudgetApp: React.FC = () => {
   const chartData = Object.entries(expensesByCategory).map(([category, amount]) => ({
     name: category,
     value: amount,
-    color: budgets.find(b => b.category === category)?.color || '#8884d8'
+    color: budgets.find(b => b.category === category)?.color || '#8B5CF6'
   }));
 
   const monthlyData = [
@@ -119,7 +120,6 @@ const BudgetApp: React.FC = () => {
 
       setTransactions([transaction, ...transactions]);
       
-      // Update budget spent amount
       if (newTransaction.type === 'expense') {
         setBudgets(budgets.map(budget => 
           budget.category === newTransaction.category
@@ -134,66 +134,120 @@ const BudgetApp: React.FC = () => {
   };
 
   const connectToRevolut = () => {
-    // Mock Revolut integration
     alert('Revolut integration would require API keys and OAuth setup. This is a demo showing how the UI would look.');
   };
 
+  const formatCurrency = (amount: number) => {
+    return hideBalances ? '•••••' : `$${amount.toLocaleString()}`;
+  };
+
   return (
-    <div className="space-y-6">
-      {/* Header with Balance Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-gradient-to-r from-green-400 to-green-600 rounded-xl p-6 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-green-100 text-sm font-medium">Total Balance</p>
-              <p className="text-2xl font-bold">${balance.toLocaleString()}</p>
-            </div>
-            <Wallet className="h-8 w-8 text-green-200" />
-          </div>
+    <div className="space-y-8 animate-fade-in">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+          <p className="text-gray-600 mt-1">Welcome back! Here's your financial overview.</p>
         </div>
-
-        <div className="bg-gradient-to-r from-blue-400 to-blue-600 rounded-xl p-6 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-blue-100 text-sm font-medium">Income</p>
-              <p className="text-2xl font-bold">${totalIncome.toLocaleString()}</p>
-            </div>
-            <ArrowUpRight className="h-8 w-8 text-blue-200" />
-          </div>
-        </div>
-
-        <div className="bg-gradient-to-r from-red-400 to-red-600 rounded-xl p-6 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-red-100 text-sm font-medium">Expenses</p>
-              <p className="text-2xl font-bold">${totalExpenses.toLocaleString()}</p>
-            </div>
-            <ArrowDownRight className="h-8 w-8 text-red-200" />
-          </div>
-        </div>
-
-        <div className="bg-gradient-to-r from-purple-400 to-purple-600 rounded-xl p-6 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-purple-100 text-sm font-medium">Revolut</p>
-              <p className="text-2xl font-bold">${revolutBalance.toLocaleString()}</p>
-            </div>
-            <CreditCard className="h-8 w-8 text-purple-200" />
-          </div>
+        <div className="mt-4 sm:mt-0 flex items-center space-x-3">
           <button
-            onClick={connectToRevolut}
-            className="mt-2 text-xs bg-white bg-opacity-20 px-3 py-1 rounded-full hover:bg-opacity-30 transition-colors"
+            onClick={() => setHideBalances(!hideBalances)}
+            className="btn-secondary"
           >
-            Connect
+            {hideBalances ? <Eye className="h-4 w-4 mr-2" /> : <EyeOff className="h-4 w-4 mr-2" />}
+            {hideBalances ? 'Show' : 'Hide'} Balances
+          </button>
+          <button
+            onClick={() => setShowAddTransaction(true)}
+            className="btn-primary"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Add Transaction
           </button>
         </div>
       </div>
 
+      {/* Balance Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Total Balance */}
+        <div className="gradient-card gradient-blue rounded-2xl p-6 text-white">
+          <div className="relative z-10 flex items-center justify-between">
+            <div>
+              <p className="text-blue-100 text-sm font-medium">Total Balance</p>
+              <p className="text-3xl font-bold text-shadow mt-1">{formatCurrency(balance)}</p>
+              <div className="flex items-center mt-2 text-blue-100">
+                <TrendingUp className="h-4 w-4 mr-1" />
+                <span className="text-sm">+2.5% this month</span>
+              </div>
+            </div>
+            <div className="bg-white bg-opacity-20 p-3 rounded-xl">
+              <Wallet className="h-6 w-6" />
+            </div>
+          </div>
+        </div>
+
+        {/* Income */}
+        <div className="gradient-card gradient-green rounded-2xl p-6 text-white">
+          <div className="relative z-10 flex items-center justify-between">
+            <div>
+              <p className="text-emerald-100 text-sm font-medium">Monthly Income</p>
+              <p className="text-3xl font-bold text-shadow mt-1">{formatCurrency(totalIncome)}</p>
+              <div className="flex items-center mt-2 text-emerald-100">
+                <ArrowUpRight className="h-4 w-4 mr-1" />
+                <span className="text-sm">+5.2% vs last month</span>
+              </div>
+            </div>
+            <div className="bg-white bg-opacity-20 p-3 rounded-xl">
+              <TrendingUp className="h-6 w-6" />
+            </div>
+          </div>
+        </div>
+
+        {/* Expenses */}
+        <div className="gradient-card gradient-orange rounded-2xl p-6 text-white">
+          <div className="relative z-10 flex items-center justify-between">
+            <div>
+              <p className="text-orange-100 text-sm font-medium">Monthly Expenses</p>
+              <p className="text-3xl font-bold text-shadow mt-1">{formatCurrency(totalExpenses)}</p>
+              <div className="flex items-center mt-2 text-orange-100">
+                <ArrowDownRight className="h-4 w-4 mr-1" />
+                <span className="text-sm">-1.8% vs last month</span>
+              </div>
+            </div>
+            <div className="bg-white bg-opacity-20 p-3 rounded-xl">
+              <Receipt className="h-6 w-6" />
+            </div>
+          </div>
+        </div>
+
+        {/* Revolut Card */}
+        <div className="gradient-card gradient-purple rounded-2xl p-6 text-white">
+          <div className="relative z-10 flex items-center justify-between">
+            <div>
+              <p className="text-purple-100 text-sm font-medium">Revolut Account</p>
+              <p className="text-3xl font-bold text-shadow mt-1">{formatCurrency(revolutBalance)}</p>
+              <button
+                onClick={connectToRevolut}
+                className="mt-2 text-xs bg-white bg-opacity-20 px-3 py-1 rounded-full hover:bg-opacity-30 transition-colors"
+              >
+                Sync Account
+              </button>
+            </div>
+            <div className="bg-white bg-opacity-20 p-3 rounded-xl">
+              <CreditCard className="h-6 w-6" />
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Expense Distribution Pie Chart */}
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Expense Distribution</h3>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Expense Distribution */}
+        <div className="chart-container">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-semibold text-gray-900">Expense Distribution</h3>
+            <div className="badge badge-primary">This Month</div>
+          </div>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
@@ -202,7 +256,7 @@ const BudgetApp: React.FC = () => {
                 cy="50%"
                 labelLine={false}
                 label={({ name, percent }) => `${name} ${percent ? (percent * 100).toFixed(0) : 0}%`}
-                outerRadius={80}
+                outerRadius={100}
                 fill="#8884d8"
                 dataKey="value"
               >
@@ -215,52 +269,77 @@ const BudgetApp: React.FC = () => {
           </ResponsiveContainer>
         </div>
 
-        {/* Monthly Income vs Expenses */}
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Monthly Overview</h3>
+        {/* Monthly Overview */}
+        <div className="chart-container">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-semibold text-gray-900">Monthly Trends</h3>
+            <div className="badge badge-success">6 Months</div>
+          </div>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={monthlyData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis />
+              <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+              <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+              <YAxis tick={{ fontSize: 12 }} />
               <Tooltip formatter={(value) => [`$${value}`, '']} />
-              <Bar dataKey="income" fill="#10B981" name="Income" />
-              <Bar dataKey="expenses" fill="#EF4444" name="Expenses" />
+              <Bar dataKey="income" fill="#10B981" name="Income" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="expenses" fill="#EF4444" name="Expenses" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
       </div>
 
       {/* Budget Overview */}
-      <div className="bg-white rounded-xl shadow-sm p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Budget Overview</h3>
-        <div className="space-y-4">
+      <div className="card">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-primary-100 rounded-xl flex items-center justify-center">
+              <Target className="h-5 w-5 text-primary-600" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Budget Overview</h3>
+              <p className="text-sm text-gray-500">Track your spending against your budget goals</p>
+            </div>
+          </div>
+        </div>
+        
+        <div className="space-y-6">
           {budgets.map((budget) => {
             const percentage = (budget.spent / budget.allocated) * 100;
             const isOverBudget = percentage > 100;
+            const remaining = budget.allocated - budget.spent;
             
             return (
-              <div key={budget.category} className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="font-medium text-gray-900">{budget.category}</span>
-                  <span className={`text-sm ${isOverBudget ? 'text-red-600' : 'text-gray-600'}`}>
-                    ${budget.spent} / ${budget.allocated}
-                  </span>
+              <div key={budget.category} className="p-4 rounded-xl border border-gray-100 hover:border-gray-200 transition-colors">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center space-x-3">
+                    <div 
+                      className="w-3 h-3 rounded-full"
+                      style={{ backgroundColor: budget.color }}
+                    />
+                    <span className="font-medium text-gray-900">{budget.category}</span>
+                  </div>
+                  <div className="text-right">
+                    <p className={`font-semibold ${isOverBudget ? 'text-danger-600' : 'text-gray-900'}`}>
+                      ${budget.spent} / ${budget.allocated}
+                    </p>
+                    <p className={`text-xs ${remaining >= 0 ? 'text-success-600' : 'text-danger-600'}`}>
+                      {remaining >= 0 ? `$${remaining} remaining` : `$${Math.abs(remaining)} over budget`}
+                    </p>
+                  </div>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
+                
+                <div className="progress-bar">
                   <div
-                    className={`h-2 rounded-full transition-all duration-300 ${
-                      isOverBudget ? 'bg-red-500' : 'bg-blue-500'
-                    }`}
-                    style={{
-                      width: `${Math.min(percentage, 100)}%`,
-                      backgroundColor: budget.color
-                    }}
+                    className={`progress-fill ${isOverBudget ? 'bg-danger-500' : 'bg-gradient-to-r from-primary-500 to-primary-600'}`}
+                    style={{ width: `${Math.min(percentage, 100)}%` }}
                   />
                 </div>
-                <div className="text-xs text-gray-500">
-                  {percentage.toFixed(1)}% used
-                  {isOverBudget && <span className="text-red-500 ml-2">Over budget!</span>}
+                
+                <div className="flex items-center justify-between mt-2 text-xs">
+                  <span className="text-gray-500">{percentage.toFixed(1)}% used</span>
+                  {isOverBudget && (
+                    <span className="badge badge-danger">Over Budget</span>
+                  )}
                 </div>
               </div>
             );
@@ -268,107 +347,155 @@ const BudgetApp: React.FC = () => {
         </div>
       </div>
 
-      {/* Transactions */}
-      <div className="bg-white rounded-xl shadow-sm">
-        <div className="p-6 border-b border-gray-200">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-gray-900">Recent Transactions</h3>
-            <button
-              onClick={() => setShowAddTransaction(true)}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-blue-700 transition-colors"
-            >
-              <Plus className="h-4 w-4" />
-              <span>Add Transaction</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Add Transaction Form */}
-        {showAddTransaction && (
-          <div className="p-6 bg-gray-50 border-b border-gray-200">
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-              <select
-                value={newTransaction.type}
-                onChange={(e) => setNewTransaction({...newTransaction, type: e.target.value as 'income' | 'expense'})}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+      {/* Add Transaction Modal */}
+      {showAddTransaction && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl shadow-large max-w-md w-full p-6 animate-slide-up">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-gray-900">Add New Transaction</h3>
+              <button
+                onClick={() => setShowAddTransaction(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
               >
-                <option value="expense">Expense</option>
-                <option value="income">Income</option>
-              </select>
-              <input
-                type="number"
-                placeholder="Amount"
-                value={newTransaction.amount}
-                onChange={(e) => setNewTransaction({...newTransaction, amount: e.target.value})}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <select
-                value={newTransaction.category}
-                onChange={(e) => setNewTransaction({...newTransaction, category: e.target.value})}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select Category</option>
-                <option value="Food">Food</option>
-                <option value="Transport">Transport</option>
-                <option value="Entertainment">Entertainment</option>
-                <option value="Rent">Rent</option>
-                <option value="Utilities">Utilities</option>
-                <option value="Salary">Salary</option>
-                <option value="Freelance">Freelance</option>
-              </select>
-              <input
-                type="text"
-                placeholder="Description"
-                value={newTransaction.description}
-                onChange={(e) => setNewTransaction({...newTransaction, description: e.target.value})}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <div className="flex space-x-2">
-                <button
-                  onClick={handleAddTransaction}
-                  className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors"
+                <Plus className="h-5 w-5 rotate-45" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Type</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => setNewTransaction({...newTransaction, type: 'expense'})}
+                    className={`p-3 rounded-xl border text-sm font-medium transition-colors ${
+                      newTransaction.type === 'expense'
+                        ? 'border-primary-500 bg-primary-50 text-primary-700'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    Expense
+                  </button>
+                  <button
+                    onClick={() => setNewTransaction({...newTransaction, type: 'income'})}
+                    className={`p-3 rounded-xl border text-sm font-medium transition-colors ${
+                      newTransaction.type === 'income'
+                        ? 'border-success-500 bg-success-50 text-success-700'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    Income
+                  </button>
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Amount</label>
+                <div className="relative">
+                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <input
+                    type="number"
+                    placeholder="0.00"
+                    value={newTransaction.amount}
+                    onChange={(e) => setNewTransaction({...newTransaction, amount: e.target.value})}
+                    className="input-field pl-10"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                <select
+                  value={newTransaction.category}
+                  onChange={(e) => setNewTransaction({...newTransaction, category: e.target.value})}
+                  className="select-field"
                 >
-                  Add
-                </button>
-                <button
-                  onClick={() => setShowAddTransaction(false)}
-                  className="bg-gray-400 text-white px-4 py-2 rounded-md hover:bg-gray-500 transition-colors"
-                >
-                  Cancel
-                </button>
+                  <option value="">Select Category</option>
+                  <option value="Food">Food & Dining</option>
+                  <option value="Transport">Transportation</option>
+                  <option value="Entertainment">Entertainment</option>
+                  <option value="Rent">Housing & Rent</option>
+                  <option value="Utilities">Utilities</option>
+                  <option value="Salary">Salary</option>
+                  <option value="Freelance">Freelance</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                <input
+                  type="text"
+                  placeholder="What was this for?"
+                  value={newTransaction.description}
+                  onChange={(e) => setNewTransaction({...newTransaction, description: e.target.value})}
+                  className="input-field"
+                />
               </div>
             </div>
+            
+            <div className="flex space-x-3 mt-6">
+              <button
+                onClick={() => setShowAddTransaction(false)}
+                className="btn-secondary flex-1"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAddTransaction}
+                className="btn-primary flex-1"
+              >
+                Add Transaction
+              </button>
+            </div>
           </div>
-        )}
+        </div>
+      )}
 
-        <div className="divide-y divide-gray-200">
-          {transactions.slice(0, 10).map((transaction) => (
-            <div key={transaction.id} className="p-6 hover:bg-gray-50 transition-colors">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <div className={`p-2 rounded-full ${
-                    transaction.type === 'income' ? 'bg-green-100' : 'bg-red-100'
-                  }`}>
-                    {transaction.type === 'income' ? (
-                      <TrendingUp className={`h-5 w-5 ${
-                        transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
-                      }`} />
-                    ) : (
-                      <TrendingDown className="h-5 w-5 text-red-600" />
-                    )}
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-900">{transaction.description}</p>
-                    <p className="text-sm text-gray-500">{transaction.category} • {transaction.date}</p>
+      {/* Recent Transactions */}
+      <div className="card">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-success-100 rounded-xl flex items-center justify-center">
+              <Receipt className="h-5 w-5 text-success-600" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Recent Transactions</h3>
+              <p className="text-sm text-gray-500">Your latest financial activity</p>
+            </div>
+          </div>
+          <button className="btn-secondary">View All</button>
+        </div>
+
+        <div className="space-y-1">
+          {transactions.slice(0, 8).map((transaction) => (
+            <div key={transaction.id} className="transaction-item">
+              <div className="flex items-center space-x-4">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                  transaction.type === 'income' ? 'bg-success-100' : 'bg-danger-100'
+                }`}>
+                  {transaction.type === 'income' ? (
+                    <TrendingUp className="h-5 w-5 text-success-600" />
+                  ) : (
+                    <TrendingDown className="h-5 w-5 text-danger-600" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-gray-900 truncate">{transaction.description}</p>
+                  <div className="flex items-center space-x-2 mt-1">
+                    <span className={`badge ${
+                      transaction.type === 'income' ? 'badge-success' : 'badge-primary'
+                    }`}>
+                      {transaction.category}
+                    </span>
+                    <span className="text-xs text-gray-500">{transaction.date}</span>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className={`font-semibold ${
-                    transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
-                  }`}>
-                    {transaction.type === 'income' ? '+' : '-'}${transaction.amount.toLocaleString()}
-                  </p>
-                </div>
+              </div>
+              <div className="text-right">
+                <p className={`font-semibold ${
+                  transaction.type === 'income' ? 'text-success-600' : 'text-danger-600'
+                }`}>
+                  {transaction.type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
+                </p>
               </div>
             </div>
           ))}
